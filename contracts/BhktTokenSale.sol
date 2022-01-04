@@ -44,4 +44,18 @@ contract BhktTokenSale {
         // Trigger Sell Event
         emit Sell(msg.sender, _numberOfTokens);
     }
+
+    // Ending the sale
+    function endSale() public {
+        // require that only an admin can do this
+        require(msg.sender == admin);
+
+        // Transfer remaining tokens to admin i.e. account[0]
+        require(tokenContract.transfer(admin, tokenContract.balanceOf(address(this))));
+
+        // Destroy the contract
+        // selfdestruct is an inelegant way to stop a contract and could lead to non-trivial problems
+        // Consider using Open Zeppelin Pausable.sol instead
+        // selfdestruct(admin); // TODO: Need to fix this
+    }
 }

@@ -61,4 +61,29 @@ contract('BhktTokenSale', function(accounts) {
             assert(error.message.indexOf('revert') >= 0, 'cannot purchase more tokens than available');
         });
     });
+
+    it('ends token sale', function() {
+        return BhktToken.deployed().then(function(instance) {
+            tokenInstance = instance;
+            return BhktTokenSale.deployed();
+        }).then(function(instance) {
+            tokenSaleInstance = instance;
+
+            // Try to end sale from a non-admin account
+            return tokenSaleInstance.endSale({from: buyer});
+        }).then(assert.fail).catch(function(error) {
+            assert(error.message.indexOf('revert') >= 0, 'must be admin to end sale');
+            
+            // End sale as admin
+            return tokenSaleInstance.endSale({from: admin});
+        }).then(function(receipt) {
+            return tokenInstance.balanceOf(admin);
+        }).then(function(balance) {
+            assert.equal(balance.toNumber(), 999990, 'returns all unsold tokens to admin'); 
+            // Check that token price was reset when selfdestruct() was called
+            return tokenSaleInstance.tokenPrice();
+        }).then(function(price) {
+            assert.equal(price.toNumber(), 0, 'token price is reset');
+        });
+    });
 });
