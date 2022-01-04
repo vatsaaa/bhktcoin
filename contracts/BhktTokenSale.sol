@@ -32,8 +32,12 @@ contract BhktTokenSale {
         // Require that value is equal to tokens
         require(msg.value == multiply(_numberOfTokens, tokenPrice));
 
-        // Require that he contract has enough tokens
+        // Require that the contract has enough tokens
+        require(tokenContract.balanceOf(address(this)) >= _numberOfTokens);
+
         // Require that a transfer is successful
+        require(tokenContract.transfer(msg.sender, _numberOfTokens));
+
         // Keep track of tokensSold
         tokensSold += _numberOfTokens;
 
